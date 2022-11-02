@@ -23,6 +23,19 @@ function Enemy() {
     this.maxAtk = 3;
     this.x = 0;
     this.y = 0;
+    setInterval(function() {
+        if(Math.abs(this.x - game.player.x) <= 1 && Math.abs(this.y - game.player.y) <= 1) {
+            this.attack();
+        }else {
+
+        }
+        game.render();
+    }.bind(this), 500);
+}
+
+Enemy.prototype.attack = function() {
+    var attack = getRandomInt(this.minAtk, this.maxAtk + 1);
+    game.player.hp -= attack;
 }
 
 Hero.prototype.collect = function(potions, swords) {
