@@ -20,6 +20,8 @@ function Game() {
     this.hCorridors = [];
     this.vCorridors = [];
     this.player = new Hero();
+    this.swords = [];
+    this.potions = [];
 }
 
 Game.prototype.init = function() {
@@ -60,6 +62,23 @@ Game.prototype.init = function() {
     this.player.x = freeSpaces[playerPosI][1];
     this.player.y = freeSpaces[playerPosI][0];
     freeSpaces.splice(playerPosI, 1);
+
+    this.swords = [];
+
+    for(var i = 0; i < 2; i++) {
+        var swordPosI = getRandomInt(0, freeSpaces.length);
+        this.swords.push([freeSpaces[swordPosI][1], freeSpaces[swordPosI][0]]);
+        freeSpaces.splice(swordPosI, 1);
+    }
+
+    this.potions = [];
+
+    for(var i = 0; i < 10; i++) {
+        var potionPosI = getRandomInt(0, freeSpaces.length);
+        this.potions.push([freeSpaces[potionPosI][1], freeSpaces[potionPosI][0]]);
+        freeSpaces.splice(potionPosI, 1);
+    }
+
 }
 
 Game.prototype.addRoom = function() {
@@ -132,6 +151,18 @@ Game.prototype.render = function() {
                 playerHpEl.classList.add("health");
                 playerHpEl.style.width = this.player.hp * 5 + "%";
                 tile.appendChild(playerHpEl);
+            }
+
+            for(var k = 0; k < this.swords.length; k++) {
+                if(this.swords[k][0] === j && this.swords[k][1] === i) {
+                    tile.classList.add("tileSW");
+                }
+            }
+
+            for(var k = 0; k < this.potions.length; k++) {
+                if(this.potions[k][0] === j && this.potions[k][1] === i) {
+                    tile.classList.add("tileHP");
+                }
             }
             tile.style.top = 25 * i + "px";
             tile.style.left = 25 * j + "px";
