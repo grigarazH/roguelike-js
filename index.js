@@ -1,3 +1,5 @@
+var RESTORED_HEALTH = 10;
+
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -14,6 +16,31 @@ function Hero() {
     this.y = 0;
 }
 
+function Enemy() {
+    this.maxHP = 20;
+    this.hp = 20;
+    this.minAtk = 1;
+    this.maxAtk = 3;
+    this.x = 0;
+    this.y = 0;
+}
+
+Hero.prototype.collect = function(potions, swords) {
+    for(var i = 0; i < swords.length; i++) {
+        if(this.x === swords[i][0] && this.y === swords[i][1]) {
+            this.swordLevel++;
+            swords.splice(i, 1);
+        }
+    }
+    for(var i = 0; i < potions.length; i++) {
+        if(this.x === potions[i][0] && this.y === potions[i][1]) {
+            this.hp += RESTORED_HEALTH;
+            if(this.hp > this.maxHP) this.hp = this.maxHP;
+            potions.splice(i, 1);
+        }
+    }
+}
+
 
 function Game() {
     this.field = [];
@@ -22,6 +49,7 @@ function Game() {
     this.player = new Hero();
     this.swords = [];
     this.potions = [];
+    this.enemies = [];
 }
 
 Game.prototype.init = function() {
@@ -77,6 +105,15 @@ Game.prototype.init = function() {
         var potionPosI = getRandomInt(0, freeSpaces.length);
         this.potions.push([freeSpaces[potionPosI][1], freeSpaces[potionPosI][0]]);
         freeSpaces.splice(potionPosI, 1);
+    }
+
+    for(var i = 0; i < 10; i++) {
+        var enemyPosI = getRandomInt(0, freeSpaces.length);
+        var enemy = new Enemy();
+        enemy.x = freeSpaces[enemyPosI][1];
+        enemy.y = freeSpaces[enemyPosI][0];
+        this.enemies.push(enemy);
+        freeSpaces.splice(enemyPosI, 1);
     }
 
 }
@@ -164,6 +201,17 @@ Game.prototype.render = function() {
                     tile.classList.add("tileHP");
                 }
             }
+
+            for(var k = 0; k < this.enemies.length; k++) {
+               if(this.enemies[k].x === j && this.enemies[k].y === i) {
+                   tile.classList.add("tileE");
+                   var enemyHpEl = document.createElement("div");
+                   enemyHpEl.classList.add("health");
+                   enemyHpEl.style.width = this.enemies[k].hp * 5 + "%";
+                   tile.appendChild(enemyHpEl);
+               }
+            }
+
             tile.style.top = 25 * i + "px";
             tile.style.left = 25 * j + "px";
             fieldEl.appendChild(tile);
@@ -176,21 +224,25 @@ document.addEventListener("keydown", function (e){
         case 'W':
             if(game.player.y > 0 && game.field[game.player.y - 1][game.player.x] === 'F') {
                 game.player.y -= 1;
+                game.player.collect(game.potions, game.swords);
             }
             break;
         case 'S':
             if(game.player.y < 25 && game.field[game.player.y + 1][game.player.x] === 'F') {
                 game.player.y += 1;
+                game.player.collect(game.potions, game.swords);
             }
             break;
         case 'D':
             if(game.player.x < 39 && game.field[game.player.y][game.player.x + 1] === 'F') {
                 game.player.x += 1;
+                game.player.collect(game.potions, game.swords);
             }
             break;
         case 'A':
             if(game.player.x > 0 && game.field[game.player.y][game.player.x - 1] === 'F') {
                 game.player.x -= 1;
+                game.player.collect(game.potions, game.swords);
             }
             break;
     }
