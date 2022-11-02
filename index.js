@@ -17,6 +17,8 @@ function Hero() {
 
 function Game() {
     this.field = [];
+    this.hCorridors = [];
+    this.vCorridors = [];
     this.player = new Hero();
 }
 
@@ -28,18 +30,24 @@ Game.prototype.init = function() {
         }
         this.field[i] = row;
     }
-    var roomCount = getRandomInt(5, 11);
-    for(var i = 0; i < roomCount; i++) {
-        this.addRoom();
-    }
-
+    this.hCorridors = [];
+    this.vCorridors = [];
+    //Добавление коридоров
     var hCorridorCount = getRandomInt(3, 6);
     for(var i = 0; i < hCorridorCount; i++) {
-        this.addCorridor('H');
+        this.hCorridors.push(this.addCorridor('H'));
     }
     var vCorridorCount = getRandomInt(3, 6);
     for(var i = 0; i < vCorridorCount; i++) {
-        this.addCorridor('V');
+        this.vCorridors.push(this.addCorridor('V'));
+    }
+
+    var roomCount = getRandomInt(5, 11);
+    var k = 0;
+    while(k < roomCount) {
+        if(this.addRoom()) {
+            k++;
+        }
     }
     var freeSpaces = [];
     for(var i = 0; i < 26; i++) {
@@ -59,12 +67,33 @@ Game.prototype.addRoom = function() {
     var height = getRandomInt(3, 9);
     var startX = getRandomInt(0, 40 - width - 1);
     var startY = getRandomInt(0, 26 - height - 1);
+    var endX = startX + width;
+    var endY = startY + height;
+    var isValidRoom = false;
+    for(var i = 0; i < this.vCorridors.length; i++) {
+        if(this.vCorridors[i] >= startX && this.vCorridors[i] < endX) {
+            isValidRoom = true;
+            break;
+        }
+    }
 
-    for(var i = startY; i < startY + height; i++) {
-        for(var j = startX; j < startX + width; j++) {
+    for(var i = 0; i< this.hCorridors.length; i++) {
+        if(this.hCorridors[i] >= startY && this.hCorridors[i] < endY) {
+            isValidRoom = true;
+            break;
+        }
+    }
+
+    if(!isValidRoom) {
+        return false;
+    }
+    for(var i = startY; i < endY; i++) {
+        for(var j = startX; j < endX; j++) {
             this.field[i][j] = 'F';
         }
     }
+
+    return true;
 }
 
 Game.prototype.addCorridor = function(direction) {
@@ -73,11 +102,13 @@ Game.prototype.addCorridor = function(direction) {
         for (var j = 0; j < 40; j++) {
             this.field[y][j] = 'F';
         }
+        return y;
     }else {
         var x = getRandomInt(0, 40);
         for (var i = 0; i < 26; i++) {
             this.field[i][x] = 'F';
         }
+        return x;
     }
 }
 
