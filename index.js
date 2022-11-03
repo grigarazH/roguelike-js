@@ -24,10 +24,38 @@ function Enemy() {
     this.x = 0;
     this.y = 0;
     setInterval(function() {
-        if(Math.abs(this.x - game.player.x) <= 1 && Math.abs(this.y - game.player.y) <= 1) {
+        if(Math.abs(this.x - game.player.x) <= 1 && Math.abs(this.y - game.player.y) <= 1 && this.hp > 0) {
             this.attack();
         }else {
-
+            var hasMoved = false;
+            while(!hasMoved) {
+                var direction = getRandomInt(0, 4);
+                switch(direction) {
+                    case 0:
+                        if(this.y > 0 && game.field[this.y - 1][this.x] === 'F') {
+                            this.y--;
+                            hasMoved = true;
+                        }
+                        break;
+                    case 1:
+                        if(this.y <= 25 && game.field[this.y + 1][this.x] === 'F') {
+                            this.y++;
+                            hasMoved = true;
+                        }
+                        break;
+                    case 2:
+                        if(this.x > 0 && game.field[this.y][this.x - 1] === 'F') {
+                            this.x--;
+                            hasMoved = true;
+                        }
+                        break;
+                    case 3:
+                        if(this.x <= 39 && game.field[this.y][this.x + 1] === 'F') {
+                            this.x++;
+                            hasMoved = true;
+                        }
+                }
+            }
         }
         game.render();
     }.bind(this), 500);
@@ -51,6 +79,14 @@ Hero.prototype.collect = function(potions, swords) {
             if(this.hp > this.maxHP) this.hp = this.maxHP;
             potions.splice(i, 1);
         }
+    }
+}
+
+Hero.prototype.attack = function(enemyIndex) {
+    var attack = getRandomInt(this.minAtk[this.swordLevel], this.maxAtk[this.swordLevel] - 1);
+    game.enemies[enemyIndex].hp -= attack;
+    if(game.enemies[enemyIndex].hp <= 0) {
+        game.enemies.splice(enemyIndex, 1);
     }
 }
 
@@ -232,7 +268,8 @@ Game.prototype.render = function() {
     }
 }
 
-document.addEventListener("keydown", function (e){
+document.addEventListener("keypress", function (e){
+    console.log(e.key);
     switch(e.key.toUpperCase()) {
         case 'W':
             if(game.player.y > 0 && game.field[game.player.y - 1][game.player.x] === 'F') {
@@ -256,6 +293,13 @@ document.addEventListener("keydown", function (e){
             if(game.player.x > 0 && game.field[game.player.y][game.player.x - 1] === 'F') {
                 game.player.x -= 1;
                 game.player.collect(game.potions, game.swords);
+            }
+            break;
+        case ' ':
+            for(var i = 0; i < game.enemies.length; i++) {
+                if(Math.abs(game.player.x - game.enemies[i].x) <= 1 && Math.abs(game.player.y - game.enemies[i].y) <= 1) {
+                    game.player.attack(i);
+                }
             }
             break;
     }
